@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:12
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: mimoapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Lozano90..
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
+  backend:
+    build:
+      context: .  # ✅ Asegura que Docker usa el directorio correcto
+    container_name: backend_app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy  # ✅ Espera hasta que la DB esté lista
+    environment:
+      DATABASE_URL: postgres://postgres:Lozano90..@db:5432/mimoapp
+      PYTHONPATH: /app
+    ports:
+      - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  pgdata:
