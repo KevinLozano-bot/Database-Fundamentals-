@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.session import get_db
+from typing import List
 from schemas.enrollment import EnrollmentCreate,EnrollmentResponse, EnrollmentUpdate
-from services.enrollment_service import create_enrollment_handler, list_enrollments, get_enrollment, update_enrollment_handler, delete_enrollment
+from services.enrollment_service import create_enrollment_handler, list_enrollments, get_enrollment, update_enrollment_handler, delete_enrollment, get_enrollmet_by_user_course
 
 router = APIRouter()
 
@@ -10,12 +11,12 @@ router = APIRouter()
 @router.post("/", response_model=EnrollmentResponse)
 def create_enrollment_handler(enrollment: EnrollmentCreate, db: Session = Depends(get_db)):
     # Verificar si la inscripción ya existe
-    existing_enrollment = get_enrollment_by_user_course(db, enrollment.user_id, enrollment.course_id)
+    existing_enrollment = get_enrollmet_by_user_course(db, enrollment.user_id, enrollment.course_id)
     if existing_enrollment:
         raise HTTPException(status_code=400, detail="Enrollment already exists")
     
     # Crear la inscripción
-    return create_enrollment(db, enrollment)
+    return create_enrollment_handler(db, enrollment)
 
 # Ruta para obtener todas las inscripciones
 @router.get("/", response_model=List[EnrollmentResponse])
@@ -33,7 +34,7 @@ def get_enrollment_by_id(enrollment_id: int, db: Session = Depends(get_db)):
 # Ruta para actualizar una inscripción
 @router.put("/{id}", response_model=EnrollmentResponse)
 def modify_enrollment(enrollment_id: int, enrollment: EnrollmentUpdate, db: Session = Depends(get_db)):
-    updated_enrollment = update_enrollment(db, enrollment_id, enrollment)
+    updated_enrollment = update_enrollment_handler(db, enrollment_id, enrollment)
     if updated_enrollment is None:
         raise HTTPException(status_code=404, detail="Enrollment not found")
     return updated_enrollment
