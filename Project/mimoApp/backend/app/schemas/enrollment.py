@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class EnrollmentCreate(BaseModel):
     user_id: int
@@ -13,6 +13,7 @@ class EnrollmentUpdate(BaseModel):
     
 
 class EnrollmentResponse(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     id: int
     user_id: int
     course_id: int
