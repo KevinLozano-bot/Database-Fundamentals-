@@ -9,7 +9,7 @@ router = APIRouter()
 
 # Ruta para crear una inscripción
 @router.post("/", response_model=EnrollmentResponse)
-def create_enrollment_handler(enrollment: EnrollmentCreate, db: Session = Depends(get_db)):
+def create_enrollment(enrollment: EnrollmentCreate, db: Session = Depends(get_db)):
     # Verificar si la inscripción ya existe
     existing_enrollment = get_enrollmet_by_user_course(db, enrollment.user_id, enrollment.course_id)
     if existing_enrollment:
