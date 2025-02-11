@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from models.lesson import Lesson
-from schemas.lesson import LessonCreate
+from models.Lesson import Lesson
+from schemas.Lesson import LessonCreate
 
 def create_lesson(db: Session, lesson: LessonCreate):
     db_lesson = Lesson(title=lesson.title, description=lesson.description, course_id=lesson.course_id)

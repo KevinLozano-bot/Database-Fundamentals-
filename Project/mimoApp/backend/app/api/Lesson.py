@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.session import get_db
-from schemas.lesson import LessonCreate
+from schemas.Lesson import LessonCreate
 from services.Lesson_services import add_lesson, list_lesson, update_lesson, delete_lesson
 from models.user import User
 
