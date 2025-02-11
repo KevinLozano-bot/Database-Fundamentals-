@@ -1,29 +1,49 @@
 from sqlalchemy.orm import Session
-from repositories.enrollment_repo import create_enrollment, get_all_enrollments, get_enrollment_by_id, update_enrollment, delete_enrollment
-from schemas.enrollment import EnrollmentCreate, EnrollmentUpdate
-from fastapi import APIRouter, Depends
+from repositories.enrollment_repo import create_enrollment, get_all_enrollments, get_enrollment_by_id, update_enrollment, delete_enrollment, get_enrollmet_by_user_course
+from schemas.enrollment import EnrollmentCreate, EnrollmentUpdate, EnrollmentResponse
+from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from db.session import get_db
-from models.enrollment import Enrollment
 
 router = APIRouter()
 
-@router.post("/enrollments/", response_model=Enrollment)
+# Crear inscripción
+@router.post("/enrollments/", response_model=EnrollmentResponse)
 def create_enrollment_handler(enrollment: EnrollmentCreate, db: Session = Depends(get_db)):
+    # Verificar si la inscripción ya existe
+    existing_enrollment = get_enrollmet_by_user_course(db, enrollment.user_id, enrollment.course_id)
+    if existing_enrollment:
+        raise HTTPException(status_code=400, detail="Enrollment already exists")
+    
+    # Crear y retornar la inscripción
     return create_enrollment(db, enrollment)
 
-@router.get("/enrollments/", response_model=List[Enrollment])
+# Obtener todas las inscripciones
+@router.get("/enrollments/", response_model=List[EnrollmentResponse])
 def list_enrollments(db: Session = Depends(get_db)):
-    return get_all_enrollments(db)
+    enrollments = get_all_enrollments(db)
+    return enrollments
 
-@router.get("/enrollments/{enrollment_id}", response_model=Enrollment)
+# Obtener inscripción por ID
+@router.get("/enrollments/{enrollment_id}", response_model=EnrollmentResponse)
 def get_enrollment(enrollment_id: int, db: Session = Depends(get_db)):
-    return get_enrollment_by_id(db, enrollment_id)
+    enrollment = get_enrollment_by_id(db, enrollment_id)
+    if enrollment is None:
+        raise HTTPException(status_code=404, detail="Enrollment not found")
+    return enrollment
 
-@router.put("/enrollments/{enrollment_id}", response_model=Enrollment)
+# Actualizar inscripción
+@router.put("/enrollments/{enrollment_id}", response_model=EnrollmentResponse)
 def update_enrollment_handler(enrollment_id: int, enrollment: EnrollmentUpdate, db: Session = Depends(get_db)):
-    return update_enrollment(db, enrollment_id, enrollment)
+    updated_enrollment = update_enrollment(db, enrollment_id, enrollment)
+    if updated_enrollment is None:
+        raise HTTPException(status_code=404, detail="Enrollment not found")
+    return updated_enrollment
 
-@router.delete("/enrollments/{enrollment_id}", response_model=Enrollment)
+# Eliminar inscripción
+@router.delete("/enrollments/{enrollment_id}", response_model=EnrollmentResponse)
 def delete_enrollment_handler(enrollment_id: int, db: Session = Depends(get_db)):
-    return delete_enrollment(db, enrollment_id)
+    enrollment = delete_enrollment(db, enrollment_id)
+    if enrollment is None:
+        raise HTTPException(status_code=404, detail="Enrollment not found")
+    return {"message": "Enrollment deleted successfully"}

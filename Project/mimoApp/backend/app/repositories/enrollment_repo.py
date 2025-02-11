@@ -9,6 +9,9 @@ def create_enrollment(db: Session, enrollment: EnrollmentCreate):
     db.refresh(new_enrollment)
     return new_enrollment
 
+def get_enrollmet_by_user_course(db: Session, user_id: int, course_id: int):
+    return db.query(Enrollment).filter(Enrollment.user_id == user_id, Enrollment.course_id == course_id).first()
+
 def get_all_enrollments(db: Session):
     return db.query(Enrollment).all()
 
