@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from backend.app.db.session import get_db
-from backend.schemas.course import CourseCreate
-from backend.app.services.course_service import add_course, list_course
+from db.session import get_db
+from schemas.course import CourseCreate
+from services.course_service import add_course, list_course
 
 router = APIRouter()
 

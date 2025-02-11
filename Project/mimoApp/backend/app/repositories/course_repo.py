@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from backend.app.models.course import Course
-from backend.schemas.course import CourseCreate
+from models.course import Course
+from schemas.course import CourseCreate
 
 def create_course(db: Session, course: CourseCreate):    
     db_course = Course(title=course.title, description=course.description)

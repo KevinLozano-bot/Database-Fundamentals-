@@ -1,11 +1,16 @@
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-from backend.app.repositories.user_repo import create_user, get_user
-from backend.schemas.user import UserCreate
-from backend.app.core.config import settings
+from db.session import SessionLocal
+from repositories.user_repo import create_user, get_user
+from schemas.user import UserCreate
+from models.user import User
+from core.config import settings
+from fastapi.security import OAuth2PasswordBearer
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -37,17 +42,24 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.upated({"exp": expire})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
-def get_current_user(db: Session, token: str):
+def get_db():
+    db = SessionLocal()
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id: int = payload.get("sub")
-        if user_id is None:
+        yield db
+    finally:
+        db.close()
+def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)) -> User: 
+    try: 
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]) 
+        user_id: int = payload.get("sub") 
+        if user_id is None: 
             raise HTTPException(status_code=401, detail="Invalid token")
-    except JWTError as exc:
-        raise HTTPException(status_code=401, detail="Invalid token") from exc  # Conservar la excepción original
-    
-    user = get_user(db, user_id)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return user
+         
+    except JWTError as exc: 
+        raise HTTPException(status_code=401, detail="Invalid token") from exc 
+    #Buscar al usuario en la base de datos  
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None: 
+        raise HTTPException(status_code=401, detail="User not found") 
+    return user 
+    #Devuelve el usuario encontrado
