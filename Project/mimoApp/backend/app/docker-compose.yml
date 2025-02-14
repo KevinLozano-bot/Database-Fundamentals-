@@ -1,0 +1,49 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:12
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: mimoapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Lozano90..
+    ports:
+      - "5432:5432"  # Asegura que el puerto 5432 sea accesible desde fuera
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
+  backend:
+    build:
+      context: .
+    container_name: backend_app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:Lozano90..@db:5432/mimoapp
+      PYTHONPATH: /app
+    ports:
+      - "8000:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com  # Cambia con tu correo
+      PGADMIN_DEFAULT_PASSWORD: admin  # Cambia la contraseña
+    ports:
+      - "5050:80"  # Exponiendo el puerto 80 del contenedor en el puerto 5050
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
