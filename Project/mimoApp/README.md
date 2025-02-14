@@ -46,15 +46,3 @@ MimoApp is an educational platform that allows users to register, create, and ma
 - **Pydantic**: Data validation
 - **OAuth2**: For authentication with token-based security
 
-## Getting Started
-
-Follow these steps to get your local copy up and running:
-
-### Prerequisites
-
-Ensure you have the following installed:
-- Python 3.8 or higher
-- Docker (optional, for containerized environment)
-- PostgreSQL (if not using Docker)
-
-### Setup
