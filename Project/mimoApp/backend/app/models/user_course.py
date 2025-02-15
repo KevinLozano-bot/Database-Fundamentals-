@@ -3,7 +3,7 @@
     between users and courses, and whether the user has completed the course. It also ensures 
     referential integrity between users and courses via foreign keys."""
 from sqlalchemy import Column, ForeignKey, Integer, Boolean
-from backend.app.db.base import Base
+from db.database import Base
 
 class UserCourse(Base):
     """

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from db.base import Base
+from db.database import Base
 from sqlalchemy import ForeignKey
 
 class Lesson(Base):
@@ -21,5 +21,5 @@ class Lesson(Base):
     # Define columns in the 'lessons' table
     id = Column(Integer, primary_key=True, index=True)  # Primary key for the lesson
     title = Column(String, unique=True, index=True, nullable=False)  # Unique lesson title
-    content = Column(String, nullable=False)  # Content of the lesson
+    content= Column(String, nullable=False)  # Content of the lesson
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)  # Foreign key linking to 'courses.id'

@@ -3,7 +3,7 @@
     username and email, and stores passwords securely in a hashed format.
     """
 from sqlalchemy import Column, Integer, String
-from db.base import Base
+from db.database import Base
 
 class User(Base):
     """

@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from models.user import User  # Assuming you have a SQLAlchemy model named User
 from schemas.user import UserResponse, UserCreate  # Pydantic schemas for user data
-from services.user_service import get_db, get_current_user, registrer_user, get_user_by_id
+from services.user_service import get_current_user, registrer_user, get_user_by_id
+from db.database import db_instance  # Se importa para usar get_session()
 
 # Create an instance of the APIRouter for managing user-related routes
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["Users"])
 
-@router.get("/me", response_model=UserResponse)
+# Get the current authenticated user's data
+@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
 def read_users_me(current_user: User = Depends(get_current_user)):
     """
     Retrieve the current user's data.
@@ -28,8 +30,9 @@ def read_users_me(current_user: User = Depends(get_current_user)):
     # Converts the SQLAlchemy user object to a Pydantic UserResponse model
     return UserResponse.model_validate(current_user)
 
-@router.post("/users")
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
+# Create a new user
+@router.post("/", status_code=status.HTTP_201_CREATED)
+def create_user(user: UserCreate, db: Session = Depends(db_instance.get_session)):  # Se usa get_session()
     """
     Create a new user.
 
@@ -39,7 +42,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
     Parameters:
         - user (UserCreate): The user data for creating the new user.
-        - db (Session): The database session provided by the `get_db` dependency.
+        - db (Session): The database session provided by the `get_session` dependency.
 
     Returns:
         - dict: A confirmation message or response indicating the user was created.
@@ -48,10 +51,13 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         {"message": "User Created Successfully", "user": "johndoe"}
     """
     # Calls the service to register the new user in the database
-    return registrer_user(db, user)
+    new_user = registrer_user(db, user)
+    
+    return {"message": "User Created Successfully", "user": new_user.username}
 
-@router.get("/{user_id}", response_model=UserResponse)
-def get_user(user_id: int, db: Session = Depends(get_db)):
+# Retrieve a specific user by their ID
+@router.get("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
+def get_user(user_id: int, db: Session = Depends(db_instance.get_session)):  # Se usa get_session()
     """
     Retrieve a specific user by their ID.
 
@@ -60,7 +66,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 
     Parameters:
         - user_id (int): The ID of the user to retrieve.
-        - db (Session): The database session provided by the `get_db` dependency.
+        - db (Session): The database session provided by the `get_session` dependency.
 
     Returns:
         - UserResponse: The details of the user identified by the given ID.
@@ -75,6 +81,6 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     db_user = get_user_by_id(db, user_id)
     
     if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
-    return db_user
+    return UserResponse.model_validate(db_user)

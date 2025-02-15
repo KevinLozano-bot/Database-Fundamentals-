@@ -6,7 +6,8 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 RUN pip install fastapi uvicorn
 RUN pip install python-multipart
-RUN pip install pydantic_settings
+RUN pip install pydantic
+RUN pip install pydantic[email]
 
 
 COPY . .

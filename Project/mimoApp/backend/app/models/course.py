@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from db.base import Base
+from db.database import Base
 
 class Course(Base):
     """
@@ -17,6 +17,6 @@ class Course(Base):
     __tablename__ = "courses"  # Name of the table in the database
 
     # Define columns in the 'courses' table
-    id = Column(Integer, primary_key=True, index=True)  # Primary key for the course
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)  # Primary key for the course
     title = Column(String, unique=True, index=True, nullable=False)  # Unique course title
     description = Column(String, nullable=False)  # Course description

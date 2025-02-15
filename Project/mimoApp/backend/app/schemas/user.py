@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, EmailStr
 
 class UserBase(BaseModel):
     """
@@ -9,10 +9,12 @@ class UserBase(BaseModel):
 
     Attributes:
         username (str): The unique username of the user.
-        email (str): The email address of the user.
+        email (EmailStr): The email address of the user.
     """
-    username: str
-    email: str
+    id: int = Field(..., description="The unique identifier of the user.")
+    username: str = Field(..., min_length=3, max_length=50, description="The unique username of the user.")
+    email: EmailStr = Field(..., description="The email address of the user. Must be a valid email format.")
+    password: str = Field(..., min_length=6, description="The password for the new user. Minimum length of 6 characters.")
 
 
 class UserCreate(UserBase):
@@ -25,7 +27,10 @@ class UserCreate(UserBase):
     Attributes:
         password (str): The password for the new user. Required during user registration.
     """
-    password: str  # Only used when creating a new user
+    id: int = Field(..., description="The unique identifier of the user.")
+    username: str = Field(..., min_length=3, max_length=50, description="The unique username of the user.")
+    email: EmailStr = Field(..., description="The email address of the user. Must be a valid email format.")
+    password: str = Field(..., min_length=6, description="The password for the new user. Minimum length of 6 characters.")
 
 
 class UserResponse(UserBase):
@@ -38,7 +43,7 @@ class UserResponse(UserBase):
     Attributes:
         id (int): The unique identifier of the user.
     """
-    id: int
+    id: int = Field(..., description="The unique identifier of the user.")
 
     class Config:
         """
@@ -47,3 +52,4 @@ class UserResponse(UserBase):
         Enables ORM mode to allow the model to be used with SQLAlchemy objects.
         """
         orm_mode = True  # Required for Pydantic to work with ORM models
+        from_attributes = True  # Improved compatibility with SQLAlchemy models

@@ -19,22 +19,40 @@ You should have received a copy of the GNU General Public License along with PRO
 """
 
 from fastapi import FastAPI
-from api import courses
-from api import users
-from api import auth
-from api import lesson  
+from fastapi.middleware.cors import CORSMiddleware
+from api.auth import router as auth_router
+from api.users import router as users_router
+from api.courses import router as courses_router
+from api.Lesson import router as lesson_router
 
-# Create the FastAPI instance
-app = FastAPI(title="mimoApp API", version="0.0.0")
 
-# Include the routers for different routes
-app.include_router(auth.router, prefix="/auth", tags=["Auth"])
-app.include_router(users.router, prefix="/users", tags=["Users"])
-app.include_router(courses.router, prefix="/courses", tags=["Courses"])
-app.include_router(lesson.router, prefix="/lesson", tags=["Lesson"])  
+app = FastAPI(
+    title="mimoApp API",
+    description="API para gestionar usuarios, cursos y lecciones en mimoApp.",
+    version="1.0.0"
+)
 
-# Root endpoint
-@app.get("/")
+
+origins = [
+    "http://localhost:3000",  
+    "https://mimoapp.com"     
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+app.include_router(users_router, prefix="/users", tags=["Users"])
+app.include_router(courses_router, prefix="/courses", tags=["Courses"])
+app.include_router(lesson_router, prefix="/lesson", tags=["Lesson"])  
+
+
+@app.get("/", tags=["Root"])
 def root():
     """
     Welcome endpoint of the API.

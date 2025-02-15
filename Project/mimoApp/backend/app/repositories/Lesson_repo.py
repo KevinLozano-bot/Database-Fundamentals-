@@ -6,26 +6,28 @@ def create_lesson(db: Session, lesson: LessonCreate):
     """
     Creates a new lesson in the database.
 
-    This function accepts lesson details from the client in the form of a `LessonCreate` schema,
+    This function accepts lesson details from the client in the form of a `LessonCreate` schema, 
     creates a new `Lesson` object, and saves it to the database. After committing the transaction,
     it returns the created `Lesson` object.
 
     Args:
         db (Session): The database session used to interact with the database.
-        lesson (LessonCreate): The data for the lesson to be created, including its title, description, and course ID.
+        lesson (LessonCreate): The data for the lesson to be created, including its title, content, and course ID.
 
     Returns:
         Lesson: The created `Lesson` object with the assigned database ID.
     """
     # Create a new Lesson object using the data from the LessonCreate schema
-    db_lesson = Lesson(title=lesson.title, description=lesson.description, course_id=lesson.course_id)
+    db_lesson = Lesson(
+        title=lesson.title,
+        content=lesson.content,
+        course_id=lesson.course_id
+    )
     
     # Add the new lesson to the session and commit the transaction
     db.add(db_lesson)
     db.commit()
-    
-    # Refresh the object to get the latest state from the database
-    db.refresh(db_lesson)
+    db.refresh(db_lesson)  # Refresh the object to get the latest state from the database
     
     # Return the created lesson
     return db_lesson
@@ -42,16 +44,18 @@ def delete_lesson(db: Session, lesson_id: int):
         lesson_id (int): The ID of the lesson to be deleted.
 
     Returns:
-        Lesson: The deleted `Lesson` object.
+        Lesson: The deleted `Lesson` object, or None if not found.
     """
     # Query the database for the lesson by its ID
     db_lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     
-    # Delete the lesson from the session
-    db.delete(db_lesson)
-    db.commit()
+    # Check if the lesson exists
+    if db_lesson:
+        # Delete the lesson from the session
+        db.delete(db_lesson)
+        db.commit()
     
-    # Return the deleted lesson
+    # Return the deleted lesson (or None if not found)
     return db_lesson
 
 def get_all_lessons(db: Session):
@@ -104,23 +108,26 @@ def update_lesson(db: Session, lesson_id: int, lesson: LessonCreate):
     Args:
         db (Session): The database session used to interact with the database.
         lesson_id (int): The ID of the lesson to be updated.
-        lesson (LessonCreate): The new data for the lesson, including its title and description.
+        lesson (LessonCreate): The new data for the lesson, including its title, content, and course ID.
 
     Returns:
-        Lesson: The updated `Lesson` object.
+        Lesson: The updated `Lesson` object, or None if not found.
     """
     # Query the database for the lesson by its ID
     db_lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     
-    # Update the lesson's title and description
-    db_lesson.title = lesson.title
-    db_lesson.description = lesson.description
-    db.commit()
+    # Check if the lesson exists
+    if db_lesson:
+        # Update the lesson's title, content, and course ID
+        db_lesson.title = lesson.title
+        db_lesson.content = lesson.content
+        db_lesson.course_id = lesson.course_id
+        
+        # Commit the changes
+        db.commit()
+        db.refresh(db_lesson)  # Refresh the object to get the latest state from the database
     
-    # Refresh the object to get the latest state from the database
-    db.refresh(db_lesson)
-    
-    # Return the updated lesson
+    # Return the updated lesson (or None if not found)
     return db_lesson
 
 def get_lesson_by_title(db: Session, title: str):

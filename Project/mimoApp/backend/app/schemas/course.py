@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class CourseCreate(BaseModel):
     """
@@ -11,9 +11,24 @@ class CourseCreate(BaseModel):
         title (str): The title of the course.
         description (str): A detailed description of the course.
     """
-    title: str
-    description: str
+    id: int = Field(..., description="The unique identifier of the course", example=1)
+    title: str = Field(..., description="The title of the course", example="Introduction to FastAPI")
+    description: str = Field(..., description="Detailed description of the course", example="Learn the basics of FastAPI and building APIs.")
 
+class CourseUpdate(BaseModel):
+    """
+    Schema for updating an existing course.
+
+    This schema is used to validate the request body when updating a course.
+    All fields are optional, allowing partial updates of attributes.
+
+    Attributes:
+        title (str): The updated title of the course.
+        description (str): The updated description of the course.
+    """
+    id: int = Field(..., description="The unique identifier of the course", example=1)
+    title: str = Field(None, description="The updated title of the course", example="FastAPI Essentials")
+    description: str = Field(None, description="The updated description of the course", example="Essential concepts and features of FastAPI.")
 
 class CourseResponse(BaseModel):
     """
@@ -27,9 +42,9 @@ class CourseResponse(BaseModel):
         title (str): The title of the course.
         description (str): A detailed description of the course.
     """
-    id: int
-    title: str
-    description: str
+    id: int = Field(..., description="The unique identifier of the course", example=1)
+    title: str = Field(..., description="The title of the course", example="Introduction to FastAPI")
+    description: str = Field(..., description="Detailed description of the course", example="Learn the basics of FastAPI and building APIs.")
 
     class Config:
         """
@@ -39,5 +54,4 @@ class CourseResponse(BaseModel):
         with SQLAlchemy objects.
         """
         orm_mode = True
-
         from_attributes = True
